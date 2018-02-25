@@ -22,7 +22,13 @@
 #define SIGN_O 0
 #define NO_SIGN -1
 
+// boolean
+#define TRUE 1
+#define FALSE 0
+
 #include <SDL/SDL.h>
+
+void test_4_winner(int **, int *, char *);
 
 int main ( int argc, char** argv ){
 
@@ -102,7 +108,10 @@ int main ( int argc, char** argv ){
     SDL_Flip(screen);
 
     // program main loop
-    bool done = false;
+    int done = FALSE;
+    int winner = FALSE;
+    char winner_sign;
+
     while (!done)
     {
         // message processing loop
@@ -114,29 +123,37 @@ int main ( int argc, char** argv ){
             {
                 // exit if the window is closed
             case SDL_QUIT:
-                done = true;
+                done = TRUE;
                 break;
 
                 // check for keypresses
 
             case SDL_KEYDOWN:
                 {
-                    // exit if ESCAPE is pressed
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                        done = true;
-                    break;
+                    switch(event.key.keysym.sym){
+                        // exit if ESCAPE is pressed
+                        case SDLK_ESCAPE:
+                            done = TRUE;
+                        break;
+
+                        // test if SPACE is pressed used to test if there is a winner
+                        case SDLK_SPACE:
+                            test_4_winner(board, &winner, &winner_sign);
+                        break;
+                    }
                 }
             } // end switch
 
             SDL_PumpEvents();
+            int tmp_x, tmp_y;
+            int rel_pos_x, rel_pos_y;
+
             if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-                    int tmp_x, tmp_y;
                     SDL_GetMouseState(&tmp_x, &tmp_y);
 
                     /* WARNING : rel_pos_x -> index for column, rel_pos_y -> index for line */
-                    int rel_pos_x, rel_pos_y;
-                    rel_pos_x = int(tmp_x / (WIDHT_CELL+OFF_SET));
-                    rel_pos_y = int(tmp_y / (HEIGHT_CELL+OFF_SET));
+                    rel_pos_x = (int)(tmp_x / (WIDHT_CELL+OFF_SET));
+                    rel_pos_y = (int)(tmp_y / (HEIGHT_CELL+OFF_SET));
 
                     if( board[rel_pos_y][rel_pos_x] == NO_SIGN ){
                         x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
@@ -149,12 +166,10 @@ int main ( int argc, char** argv ){
             }
 
             if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
-                    int tmp_x, tmp_y;
                     SDL_GetMouseState(&tmp_x, &tmp_y);
 
-                    int rel_pos_x, rel_pos_y;
-                    rel_pos_x = int(tmp_x / (WIDHT_CELL+OFF_SET));
-                    rel_pos_y = int(tmp_y / (HEIGHT_CELL+OFF_SET));
+                    rel_pos_x = (int)(tmp_x / (WIDHT_CELL+OFF_SET));
+                    rel_pos_y = (int)(tmp_y / (HEIGHT_CELL+OFF_SET));
 
                     if( board[rel_pos_y][rel_pos_x] == NO_SIGN ){
                         o_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
@@ -188,4 +203,8 @@ int main ( int argc, char** argv ){
     free(board);
 
     return 0;
+}
+
+void test_4_winner(int **board, int *any_winner, char *win_sign){
+    printf("Test for winner =) \n");
 }
