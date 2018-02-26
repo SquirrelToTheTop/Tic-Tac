@@ -226,14 +226,39 @@ int main ( int argc, char** argv ){
 *
 */
 void test_4_winner(int **board, int *any_winner, char *win_sign){
-    int i, j, rst_ninja;
+    int i, j, rst_diag1, rst_diag2;
+    int rst_line[NCELL], rst_column[NCELL];
 
-    rst_ninja = 1;
+    /* compute product of values in board
+     * if value of product == 1, then the winner is "X"
+     * according to value set to represent "X" sign
+     * if value of product == 8 (2*2*2) then winner is "O"
+     */
+    rst_diag1 = 1;
+    rst_diag2 = 1;
     for(i=0; i<NCELL; i++){
-        rst_ninja *= board[i][i];
+        rst_diag1 *= board[i][i];
+        rst_diag2 *= board[i][NCELL-i-1];
+        rst_line[i] = 1;
+        rst_column[i] = 1;
+        for(j=0; j<NCELL; j++){
+            rst_line[i] *= board[i][j];
+            rst_column[i] *= board[j][i];
+        }
     }
 
-    *any_winner = (rst_ninja == WIN_O || rst_ninja == 1) ? TRUE : FALSE;
-    *win_sign = (rst_ninja > 1) ? "O" : "X";
-    return;
+    /* test value for diagonal */
+    *any_winner = (rst_diag1 == WIN_O || rst_diag2 == WIN_O || rst_diag1 == 1 || rst_diag2 == 1 ) ? TRUE : FALSE;
+    *win_sign = (rst_diag1 > 1 || rst_diag2 > 1 && *any_winner) ? "O" : "X";
+    if( *any_winner)
+        return;
+
+    /* test all value */
+    for(i=0; i<NCELL; i++){
+        *any_winner = (rst_line[i] == WIN_O || rst_line[i] == 1 || rst_column[i] == WIN_O || rst_column[i] == 1 ) ? TRUE : FALSE;
+        *win_sign = (rst_line[i] > 1 || rst_column[i] > 1 && *any_winner) ? "O" : "X";
+        if( *any_winner )
+            return;
+    }
+
 }
