@@ -23,7 +23,7 @@
 #define NO_SIGN 0
 #define WIN_O 8
 
-// boolean
+// boolean;
 #define TRUE 1
 #define FALSE 0
 
@@ -233,10 +233,7 @@ void test_4_winner(int **board, int *any_winner, char *win_sign){
         rst_ninja *= board[i][i];
     }
 
-    if( rst_ninja == WIN_O || rst_ninja == 1){
-        *any_winner = TRUE;
-        *win_sign = (rst_ninja > 1) ? "O" : "X";
-        return;
-    }
-
+    *any_winner = (rst_ninja == WIN_O || rst_ninja == 1) ? TRUE : FALSE;
+    *win_sign = (rst_ninja > 1) ? "O" : "X";
+    return;
 }
