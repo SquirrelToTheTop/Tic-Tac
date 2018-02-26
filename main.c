@@ -5,8 +5,8 @@
 #endif
 
 // size of cell
-#define WIDHT_CELL 50
-#define HEIGHT_CELL 50
+#define WIDHT_CELL 100
+#define HEIGHT_CELL 100
 
 // border size
 #define OFF_SET 5
@@ -29,7 +29,21 @@
 
 #include <SDL/SDL.h>
 
+/* structure for moultiple linked list */
+typedef struct Node Node;
+struct Node{
+    int value;
+    Node **next;
+};
+
+/* One tree for the planet */
+typedef struct Tree Tree;
+struct Tree{
+    Node *first;
+};
+
 void test_4_winner(int **, int *, char *);
+void create_tree(int **);
 
 int main ( int argc, char** argv ){
 
@@ -260,5 +274,15 @@ void test_4_winner(int **board, int *any_winner, char *win_sign){
         if( *any_winner )
             return;
     }
+
+}
+
+/* Create tree of possibility using chained list for min max algorithm
+ *
+ *
+ *
+ *
+ */
+void create_tree(int **board){
 
 }
