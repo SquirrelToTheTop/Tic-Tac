@@ -19,8 +19,9 @@
 
 // signs
 #define SIGN_X 1
-#define SIGN_O 0
-#define NO_SIGN -1
+#define SIGN_O 2
+#define NO_SIGN 0
+#define WIN_O 8
 
 // boolean
 #define TRUE 1
@@ -162,6 +163,9 @@ int main ( int argc, char** argv ){
 
                         /* add value to board */
                         board[rel_pos_y][rel_pos_x] = SIGN_X;
+
+                        /* test for win */
+                        test_4_winner(board, &winner, &winner_sign);
                     }
             }
 
@@ -178,7 +182,15 @@ int main ( int argc, char** argv ){
 
                         /* add value to board */
                         board[rel_pos_y][rel_pos_x] = SIGN_O;
+
+                        /* test for win */
+                        test_4_winner(board, &winner, &winner_sign);
                     }
+            }
+
+            if( winner ){
+                printf("There is a winner ! My job is done here ! Syonara pucci !\n");
+                done = TRUE;
             }
 
         } // end of message processing
@@ -205,6 +217,26 @@ int main ( int argc, char** argv ){
     return 0;
 }
 
+/* Test for a winner, ie : N aligned sign diagonaly, verticaly or horizontaly
+*
+*  Parameters :
+*               board : input board to check
+*               any_winner : return value 1 if there is a winner or 0 if not
+*               win_sign   : if any_winner == 1 win_sing contain the character of the winnner !
+*
+*/
 void test_4_winner(int **board, int *any_winner, char *win_sign){
-    printf("Test for winner =) \n");
+    int i, j, rst_ninja;
+
+    rst_ninja = 1;
+    for(i=0; i<NCELL; i++){
+        rst_ninja *= board[i][i];
+    }
+
+    if( rst_ninja == WIN_O || rst_ninja == 1){
+        *any_winner = TRUE;
+        *win_sign = (rst_ninja > 1) ? "O" : "X";
+        return;
+    }
+
 }
