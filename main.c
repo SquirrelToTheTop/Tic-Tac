@@ -32,18 +32,24 @@
 /* structure for moultiple linked list */
 typedef struct Node Node;
 struct Node{
-    int value;
+    int n_subnode;
+    float value;
     Node **next;
 };
 
 /* One tree for the planet */
 typedef struct Tree Tree;
 struct Tree{
-    Node *first;
+    Node *root;
 };
 
+
+/* Function prototype */
 void test_4_winner(int **, int *, char *);
 void create_tree(int **);
+
+Tree * initialize_tree();
+void show_tree(Tree *);
 
 int main ( int argc, char** argv ){
 
@@ -228,6 +234,10 @@ int main ( int argc, char** argv ){
     }
     free(board);
 
+    /* TEST OF TREE STRUCTURE */
+    Tree *bonzai = initialize_tree();
+    show_tree(bonzai);
+
     return 0;
 }
 
@@ -275,6 +285,91 @@ void test_4_winner(int **board, int *any_winner, char *win_sign){
             return;
     }
 
+}
+
+/* Initialize the tree since there is NCELL x NCELL
+ * the first node of the tree will have (NCELL x NCELL)-1
+ * the second ((NCELL*NCELL)-1)-1 etc ... we'll allocate the
+ * memory in consequence and hope for the best !
+ *
+ * headache with this
+ *
+ */
+Tree * initialize_tree(){
+    int i, j,k, n_lvl;
+    int *n_nodes_to_alloc;
+
+    Tree *tree;
+    Node *first, *current;
+
+    n_lvl = NCELL*NCELL -1;
+    n_nodes_to_alloc = (int) malloc(n_lvl*sizeof(int));
+
+    /* number of nodes to alloc per level */
+    n_nodes_to_alloc[0] = n_lvl;
+    for(i=1; i<n_lvl; i++){
+        n_lvl --;
+        n_nodes_to_alloc[i] = n_nodes_to_alloc[i-1]*n_lvl;
+    }
+
+    /* Feed the tree =) */
+    tree = malloc(sizeof(Tree *));
+    first = malloc(sizeof(Node *));
+
+    tree->root = first;
+    first->next = (Node **) malloc(n_nodes_to_alloc[0]*sizeof(Node *));
+    first->n_subnode = n_nodes_to_alloc[0];
+    first->value = 0.0f;
+
+    for(i=0; i<first->n_subnode; i++)
+        first->next[i] = (Node *) malloc(sizeof(Node *));
+
+    current = first;
+    Node *tmp;
+    for(i=1; i<(NCELL*NCELL)-1; i++){
+        /* alloc next lvl nodes */
+        tmp = (Node *) malloc(n_nodes_to_alloc[i]*sizeof(Node *));
+
+        /* dispatch nodes */
+        int count = 0;
+        for(j=0; j<n_nodes_to_alloc[i-1]; j++){
+            current = current->next[j];
+
+            for(k=0; k<n_nodes_to_alloc[i-1]-1; k++){
+                current->next[j] = &tmp[count];
+                count ++;
+            }
+        }
+
+    }
+
+    /* the final the next node of the final node should be set to null */
+
+    /* free memory */
+    free(n_nodes_to_alloc);
+
+    return tree;
+}
+
+
+
+/*
+ * Display the tree - used for debugging purpose !
+ *
+ */
+void show_tree(Tree *bonzai){
+    int i, j, count_lvl;
+    Node *current;
+
+    count_lvl = 1;
+    current = bonzai->root;
+
+    printf("\n");
+    while(current->next[0] != NULL){
+        printf("Current node's level : %d , %d subnodes", count_lvl, current->n_subnode);
+        current = current->next[0];
+        count_lvl ++;
+    }
 }
 
 /* Create tree of possibility using chained list for min max algorithm
