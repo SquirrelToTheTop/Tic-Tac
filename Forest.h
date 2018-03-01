@@ -16,4 +16,7 @@ struct Tree{
   Node *root;
 };
 
+Tree * initialize_tree();
+void show_tree(Tree *);
+
 #endif
