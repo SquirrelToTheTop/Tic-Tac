@@ -6,23 +6,33 @@ LDFLAGS =
 SDL_CFLAGS= $(shell sdl-config --cflags)
 SDL_LDFLAGS=$(shell sdl-config --libs)
 
+SRC=src/
+OBJ=obj/
+
 EXEC=TicTacToe.exe
 
 # list of files
-sources=$(wildcard $ *.c)
-objects_all=$(patsubst %.c, %.o, $(sources))
-objects=$(filter-out main.o, $(objects_all))
+sources=$(wildcard $(SRC)*.c)
+objects_all=$(patsubst $(SRC)%.c, $(OBJ)%.o, $(sources))
+objects=$(filter-out $(OBJ)main.o, $(objects_all))
 
 all: $(EXEC)
 
 $(EXEC): $(objects_all)
 	$(COMP) -o $(EXEC) $(objects_all) $(LDFLAGS) $(SDL_LDFLAGS)
 
-main.o: main.c $(objects)
-	$(COMP) -c main.c $(CFLAGS) $(SDL_CFLAGS) -o main.o
+$(OBJ)main.o: $(SRC)main.c $(objects)
+	$(COMP) -c $(SRC)main.c $(CFLAGS) $(SDL_CFLAGS) -o $(OBJ)main.o
+
+$(OBJ)Forest.o: $(SRC)Forest.c
+	$(COMP) -c $(SRC)Forest.c $(CFLAGS) $(SDL_CFLAGS) -o $(OBJ)Forest.o
+
+$(OBJ)Game.o: $(SRC)Game.c
+	$(COMP) -c $(SRC)Game.c $(CFLAGS) $(SDL_CFLAGS) -o $(OBJ)Game.o
 
 start: $(EXEC)
 	./$(EXEC)
+
 clean:
 	@rm -v $(EXEC)
 	@rm -v $(objects_all)
