@@ -6,6 +6,8 @@ LDFLAGS =
 SDL_CFLAGS= $(shell sdl-config --cflags)
 SDL_LDFLAGS=$(shell sdl-config --libs)
 
+$(shell mkdir obj)
+
 SRC=src/
 OBJ=obj/
 
@@ -36,3 +38,4 @@ start: $(EXEC)
 clean:
 	@rm -v $(EXEC)
 	@rm -v $(objects_all)
+	@rmdir -v obj
