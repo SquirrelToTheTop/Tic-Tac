@@ -189,7 +189,7 @@ int main ( int argc, char** argv ){
   free(board);
 
   /* TEST OF TREE STRUCTURE */
-  //Tree *bonzai = initialize_tree();
+  Tree *bonzai = initialize_tree_test();
   //show_tree(bonzai); 
   
   return 0;

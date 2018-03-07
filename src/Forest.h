@@ -17,6 +17,10 @@ struct Tree{
 };
 
 Tree * initialize_tree();
+
+/* test new algo */
+Tree * initialize_tree_test();
+
 void show_tree(Tree *);
 
 #endif

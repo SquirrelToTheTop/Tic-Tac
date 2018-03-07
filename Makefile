@@ -1,6 +1,6 @@
 COMP=gcc
 
-CFLAGS= -O2 -Wall 
+CFLAGS= -O2 -Wall -DDEBUG=1
 LDFLAGS = 
 
 SDL_CFLAGS= $(shell sdl-config --cflags)
