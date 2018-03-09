@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "Forest.h"
@@ -14,12 +15,17 @@
 Tree * initialize_tree(){
 
   /* local variables */
-  int i, j, k, n_lvl;
+  int i, j, n_2_alloc, n_lvl;
   int leaf_by_lvl[NCELL*NCELL];
 
+   /* contains all node to dispatche trouhght the tree
+   * alco could be used to parcours l'arbre en largeur 
+   */
+  Node *** leafs; 
+  
+  /* pointor to the tree */
   Tree *tree;
-  Node *current, *first;
-
+  
   /* number of level of the tree */
   n_lvl = NCELL*NCELL;
 
@@ -35,82 +41,44 @@ Tree * initialize_tree(){
   for(i=1; i<n_lvl; i++)
     leaf_by_lvl[i] = n_lvl-i;
 
-#ifdef DEBUG
-  for(i=0; i<n_lvl; i++)
-    printf("---> lvl %d -> n_leaf = %d\n", i, leaf_by_lvl[i]);
-  printf("\n");
-#endif
-
-  /* allocate the first node of the tree, ie : root */
-  first = (Node *) malloc(sizeof(Node *));
-  first->n_subnode = leaf_by_lvl[0];
-  first->previous = NULL;
-  tree->root = first;
-
-#ifdef DEBUG
-  printf("|| -> Root at %p \n",tree->root);
-#endif
-
-  /* start allocation of the whole tree */
-  current = first;
-
-#ifdef DEBUG
-  n_lvl = 4;//NCELL*NCELL;
-#else
-  n_lvl = NCELL*NCELL;
-#endif
-  
-  int n_leaf_2_current;
-  
-  /* for all lvl */
-  for(i=0; i<n_lvl-1; i++){
+  /* Allocate all nodes in triangular like matrix  
+   * allocate next array, set n_subnode value
+   */
+  leafs = (Node ***) malloc(n_lvl*sizeof(Node **));
+  for( i=1; i<n_lvl; i++){
+    n_2_alloc = leaf_by_lvl[i-1] * leaf_by_lvl[i];
     
-#ifdef DEBUG
-  printf("---> working on lvl %d\n", i);
-#endif
-	
-      /* for all leaf in the lvl */
-      int tmp_n_subnode = current->n_subnode;
-      for(j=0; j<tmp_n_subnode; j++){
-	
-	
-	/* allocate is array of leaf with number of leaf */
-	current->next = (Node **) malloc(leaf_by_lvl[i+1] * sizeof(Node **));
-	
-	/* set number of leaf of the current leaf, ie leaf j */
-	current->n_subnode = leaf_by_lvl[i+1];
-
-#ifdef DEBUG
-  printf("\t---> Node %p has %d leafs \n", current, current->n_subnode);
-#endif
-
-	/* allocate all next leaf */
-	for(k=0; k<current->n_subnode; k++){
-	  current->next[k] = (Node *) malloc(sizeof(Node *));
-	  (current->next[k])->next = NULL;
-	  (current->next[k])->previous = current;
-
-#ifdef DEBUG
-  printf("\t\t---> leaf at %p \n", current->next[k]);
-#endif
-	}
-	
-	if( current->previous ) 
-	  current = (current->previous)->next[j];
-	else
-	  current = current->next[j];
-	
-      }
-     
-     // WARNING this makes infinite loop : current = current->next[0];
-     
-      /* after finishing all leaf of a level do to sub level */
-     
+    #ifdef DEBUG
+      printf("Level %d, number of leafs %d \n", i, n_2_alloc);
+    #endif
+    leafs[i-1] = (Node **) malloc(n_2_alloc*sizeof(Node **));
+  
+    for(j=0; j<n_2_alloc; j++){
+      leafs[i-1][j] = (Node *) malloc(sizeof(Node *));
+      leafs[i-1][j]->n_subnode = leaf_by_lvl[i];
+      leafs[i-1][j]->next = (Node **) malloc(leaf_by_lvl[i]*leaf_by_lvl[i]);
+    }
   }
-
-  /* the next pointor of all final node should be set to nul */
-  /* TODO but how ??? */
-
+  
+  /* check and display some info */
+  #ifdef DEBUG
+    char tmp[10]={""};
+    
+    tmp[9] = '\0';
+    for(i=0; i<n_lvl-1; i++){
+      for(j=0;j<leaf_by_lvl[i]; j++){
+        printf("%s|-> level %d, leafs %d \n", tmp, i, leafs[i][j]->n_subnode);
+      }
+      tmp[i] = '\t';
+    }
+  #endif
+  
+  /* loop over node in levels */
+  for(i=0; i<n_lvl; i++){
+    
+    
+  }
+  
   return tree;
 }
 
@@ -173,8 +141,6 @@ Tree * initialize_tree_test(){
     n_lvl = NCELL*NCELL;
   #endif
   
-  int n_leaf_2_current;
-  
   /* for all lvl */
   for(i=0; i<n_lvl-1; i++){
     
@@ -222,16 +188,15 @@ Tree * initialize_tree_test(){
  *
  */
 void show_tree(Tree *bonzai){
-  int i, j, count_lvl, count_leaf=0;
+  int count_leaf=0;
   Node *current;
 
-  count_lvl = 0;
   current = bonzai->root;
   count_leaf = current->n_subnode;
 
   printf("\n");
   while(current->next[0] != NULL){
-    printf("-----> leaf : %p having % sub-leaf \n", current, current->n_subnode);
+    printf("-----> leaf : %p having %d sub-leaf \n", current, current->n_subnode);
 
     if( count_leaf == current->n_subnode){
       count_leaf = 0;
