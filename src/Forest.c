@@ -15,8 +15,8 @@
 Tree * initialize_tree(){
 
   /* local variables */
-  int i, j, k, n_2_alloc, n_lvl, n_current;
-  int leaf_by_lvl[NCELL*NCELL];
+  int i, j, k, n_lvl, n_current, tmp, total_node=0;
+  int nleaf_lvl[NCELL*NCELL];
 
    /* contains all node to dispatche trouhght the tree
    * alco could be used to parcours l'arbre en largeur 
@@ -32,33 +32,65 @@ Tree * initialize_tree(){
 
   /* test allocation the tree =) */
   tree = (Tree *) malloc(sizeof(Tree *));
-  if( !tree )
-    printf("Allocation failed !");
-  else
-    printf("Allocation of Tree success - mem adresse %p\n", tree);
+  if( !tree ){
+    printf("Allocation of tree failed !");
+    return NULL;
+  }else
+    printf("> Allocation of Tree success - mem adresse %p\n", tree);
 
-  /* compute leaf by level */
-  leaf_by_lvl[0] = 1;
-  for(i=1; i<n_lvl; i++)
-    leaf_by_lvl[i] = n_lvl-i;
-
+  /* compute leaf by level ------------ CHECK ---------------------------- */
+  /* level 0 -> 1 leaf
+   * level 1 -> 8 leafs per 1 mother leaf
+   * level 2 -> 56 leafs 7 per mother leaf
+   * level 3 -> 336 leafs 6 per mother leaf ...
+   */
+  nleaf_lvl[0] = 1;
+  tmp = NCELL*NCELL-1;
+  total_node = nleaf_lvl[0];
+  for(i=1; i<n_lvl; i++){
+    nleaf_lvl[i] = nleaf_lvl[i-1]*tmp;
+    total_node += nleaf_lvl[i];
+    tmp --;
+  }
+  /* --------------------------------------------------------------------- */
+  
+  /* -------------------------------------- allocate matrix -------------- */
+  
   /* Allocate all nodes in triangular like matrix  
    * allocate next array, set n_subnode value
    */
-  leafs = (Node ***) malloc(n_lvl*sizeof(Node **));
-  for( i=1; i<n_lvl; i++){
-    n_2_alloc = leaf_by_lvl[i-1] * leaf_by_lvl[i];
-    leafs[i-1] = (Node **) malloc(n_2_alloc*sizeof(Node **));
-  
-    for(j=0; j<n_2_alloc; j++){
-      leafs[i-1][j] = (Node *) malloc(sizeof(Node *));
-      leafs[i-1][j]->n_subnode = leaf_by_lvl[i];
-      leafs[i-1][j]->next = (Node **) malloc(leaf_by_lvl[i-1]*leaf_by_lvl[i]);
-    }
+  leafs = (Node ***) malloc(total_node*sizeof(Node **));
+  if( !leafs ){
+    printf("Allocation of leafs failed ! \n");
+    return NULL;
+  }else
+    printf("> Allocation of leafs success - mem adresse %p\n", i, leafs);
+    
+  for(i=0; i<n_lvl; i++){
+    leafs[i] = (Node **) malloc(nleaf_lvl[i]*sizeof(Node *));
+    if( leafs[i] == NULL ){
+      printf("Allocation of leafs[%d] failed ! \n",i);
+      return NULL;
+    }else
+      printf("> Allocation of leafs[%d] success - mem adresse %p\n", i, leafs[i]);
   }
   
+  /* --------------------------------------------------------------------- */
   
-  #ifdef DEBUG
+  /* ------------------------------------ allocate node in matrix -------- */
+  for(i=0; i<n_lvl; i++){
+   for(j=0; j<nleaf_lvl[i]; j++){
+    leafs[i][j] = (Node *) malloc(sizeof(Node));
+    if( leafs[i][j] == NULL ){
+      printf("Allocation of leafs[%d][%d] failed ! \n",i,j);
+      return NULL;
+    }
+   }
+  }
+  /* --------------------------------------------------------------------- */
+  
+  
+/*  #ifdef DEBUG
   printf("level %d  with %d leafs -> this %d @ %p\n",0, 1, 0,leafs[0][0]);
   printf(" ---------------------------------------------------------\n");
   for(i=1; i<n_lvl; i++){
@@ -68,10 +100,10 @@ Tree * initialize_tree(){
     }
     printf(" ---------------------------------------------------------\n");
   }
-  #endif
+  #endif*/
   
   /* loop over the leafs array to dispach all nodes in next arrays */
-  n_current = n_lvl-1;
+/*  n_current = n_lvl-1;
   tree->root = leafs[0][0];
   
   #ifdef DEBUG
@@ -102,7 +134,7 @@ Tree * initialize_tree(){
     #ifdef DEBUG
       tmp2[i]= '\t';
     #endif
-  }
+  } */
   
   return tree;
 }

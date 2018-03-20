@@ -190,6 +190,10 @@ int main ( int argc, char** argv ){
 
   /* TEST OF TREE STRUCTURE */
   Tree *bonzai = initialize_tree();
+  if( !bonzai ){
+    printf("Error : Allocation of bonzai failed ! Kernel Panic ! \n");
+    return 1;
+  }
   //show_tree(bonzai->root); 
   
   return 0;
