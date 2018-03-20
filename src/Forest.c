@@ -50,7 +50,7 @@ Tree * initialize_tree(){
     n_2_alloc = leaf_by_lvl[i-1] * leaf_by_lvl[i];
     
     #ifdef DEBUG
-      printf("Level %d, number of leafs %d \n", i, n_2_alloc);
+      printf("Leaf %d, number of subleafs %d \n", i, n_2_alloc);
     #endif
     leafs[i-1] = (Node **) malloc(n_2_alloc*sizeof(Node **));
   
@@ -68,7 +68,7 @@ Tree * initialize_tree(){
     tmp[9] = '\0';
     for(i=0; i<n_lvl-1; i++){
       for(j=0;j<leaf_by_lvl[i]; j++){
-        printf("%s|-> level %d, leafs number %d with %d subleafs \n", tmp, i, j, leafs[i][j]->n_subnode);
+        printf("%s|-> leaf %d with %d subleafs \n", tmp, j, leafs[i][j]->n_subnode);
       }
       tmp[i] = '\t';
     }
@@ -79,21 +79,35 @@ Tree * initialize_tree(){
   n_current = n_lvl-1;
   tree->root = leafs[0][0];
   
-  for(i=0; i<n_lvl-1; i++){
+  #ifdef DEBUG
+    char tmp2[10]={""};
+    tmp2[9] = '\0';
+  #endif
+  
+  current_leaf = leafs[0][0];
+  for(i=1; i<n_lvl-1; i++){
     
-    for(j=0; j<leaf_by_lvl[i]; j++){
-      current_leaf = leafs[i][j];
-      for(k=0; k<leaf_by_lvl[i+1]; k++){
-        // printf("Level %d -- idj : %d, idk : %d |--> id_array : %d \n", i, j, k, j*n_current+k );
-        current_leaf->next[k] = leafs[i][j*n_current+k];
+    #ifdef DEBUG
+      printf("%s|-> leaf %d @ at %p with %d subleafs \n", tmp2, i, current_leaf, leaf_by_lvl[i]);
+    #endif
+    
+    for(j=0; j<leaf_by_lvl[i-1]; j++){
+      
+      for(k=0; k<leaf_by_lvl[i]; k++){
+        #ifdef DEBUG
+          printf("\t%s --> subleaf @ %p\n", tmp2, leafs[i][j*leaf_by_lvl[i-1]+k]);
+        #endif
+        
+          current_leaf->next[k] = leafs[i][j*leaf_by_lvl[i-1]+k];
       }
+      
+      current_leaf = leafs[i][j];
     }
     
-    //printf("\nNext level ");
-    n_current = n_current -1;
+    #ifdef DEBUG
+      tmp2[i]= '\t';
+    #endif
   }
-  
-  (current_leaf->next[0])->next = NULL;
   
   return tree;
 }
