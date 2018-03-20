@@ -48,10 +48,6 @@ Tree * initialize_tree(){
   leafs = (Node ***) malloc(n_lvl*sizeof(Node **));
   for( i=1; i<n_lvl; i++){
     n_2_alloc = leaf_by_lvl[i-1] * leaf_by_lvl[i];
-    
-    #ifdef DEBUG
-      printf("Leaf %d, number of subleafs %d \n", i, n_2_alloc);
-    #endif
     leafs[i-1] = (Node **) malloc(n_2_alloc*sizeof(Node **));
   
     for(j=0; j<n_2_alloc; j++){
@@ -61,17 +57,17 @@ Tree * initialize_tree(){
     }
   }
   
-  /* check and display some info */
+  
   #ifdef DEBUG
-    char tmp[10]={""};
-    
-    tmp[9] = '\0';
-    for(i=0; i<n_lvl-1; i++){
-      for(j=0;j<leaf_by_lvl[i]; j++){
-        printf("%s|-> leaf %d with %d subleafs \n", tmp, j, leafs[i][j]->n_subnode);
-      }
-      tmp[i] = '\t';
+  printf("level %d  with %d leafs -> this %d @ %p\n",0, 1, 0,leafs[0][0]);
+  printf(" ---------------------------------------------------------\n");
+  for(i=1; i<n_lvl; i++){
+    n_2_alloc = leaf_by_lvl[i-1] * leaf_by_lvl[i];
+    for(j=0; j<n_2_alloc; j++ ){
+      printf("level %d  with %d leafs -> this %d @ %p\n",i, n_2_alloc, j, leafs[i][j]);
     }
+    printf(" ---------------------------------------------------------\n");
+  }
   #endif
   
   /* loop over the leafs array to dispach all nodes in next arrays */
