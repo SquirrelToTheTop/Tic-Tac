@@ -57,7 +57,7 @@ Tree * initialize_tree(){
     for(j=0; j<n_2_alloc; j++){
       leafs[i-1][j] = (Node *) malloc(sizeof(Node *));
       leafs[i-1][j]->n_subnode = leaf_by_lvl[i];
-      leafs[i-1][j]->next = (Node **) malloc(leaf_by_lvl[i]*leaf_by_lvl[i]);
+      leafs[i-1][j]->next = (Node **) malloc(leaf_by_lvl[i-1]*leaf_by_lvl[i]);
     }
   }
   
@@ -75,7 +75,6 @@ Tree * initialize_tree(){
   #endif
   
   /* loop over the leafs array to dispach all nodes in next arrays */
-  
   n_current = n_lvl-1;
   tree->root = leafs[0][0];
   
@@ -87,11 +86,11 @@ Tree * initialize_tree(){
   current_leaf = leafs[0][0];
   for(i=1; i<n_lvl-1; i++){
     
-    #ifdef DEBUG
-      printf("%s|-> leaf %d @ at %p with %d subleafs \n", tmp2, i, current_leaf, leaf_by_lvl[i]);
-    #endif
-    
     for(j=0; j<leaf_by_lvl[i-1]; j++){
+      
+      #ifdef DEBUG
+        printf("%s|-> leaf %d @ at %p with %d subleafs \n", tmp2, i, current_leaf, leaf_by_lvl[i]);
+      #endif
       
       for(k=0; k<leaf_by_lvl[i]; k++){
         #ifdef DEBUG
