@@ -15,13 +15,14 @@
 Tree * initialize_tree(){
 
   /* local variables */
-  int i, j, n_2_alloc, n_lvl;
+  int i, j, k, n_2_alloc, n_lvl, n_current;
   int leaf_by_lvl[NCELL*NCELL];
 
    /* contains all node to dispatche trouhght the tree
    * alco could be used to parcours l'arbre en largeur 
    */
   Node *** leafs; 
+  Node *current_leaf;
   
   /* pointor to the tree */
   Tree *tree;
@@ -67,17 +68,32 @@ Tree * initialize_tree(){
     tmp[9] = '\0';
     for(i=0; i<n_lvl-1; i++){
       for(j=0;j<leaf_by_lvl[i]; j++){
-        printf("%s|-> level %d, leafs %d \n", tmp, i, leafs[i][j]->n_subnode);
+        printf("%s|-> level %d, leafs number %d with %d subleafs \n", tmp, i, j, leafs[i][j]->n_subnode);
       }
       tmp[i] = '\t';
     }
   #endif
   
-  /* loop over node in levels */
-  for(i=0; i<n_lvl; i++){
+  /* loop over the leafs array to dispach all nodes in next arrays */
+  
+  n_current = n_lvl-1;
+  tree->root = leafs[0][0];
+  
+  for(i=0; i<n_lvl-1; i++){
     
+    for(j=0; j<leaf_by_lvl[i]; j++){
+      current_leaf = leafs[i][j];
+      for(k=0; k<leaf_by_lvl[i+1]; k++){
+        // printf("Level %d -- idj : %d, idk : %d |--> id_array : %d \n", i, j, k, j*n_current+k );
+        current_leaf->next[k] = leafs[i][j*n_current+k];
+      }
+    }
     
+    //printf("\nNext level ");
+    n_current = n_current -1;
   }
+  
+  (current_leaf->next[0])->next = NULL;
   
   return tree;
 }
@@ -186,24 +202,21 @@ Tree * initialize_tree_test(){
 /*
  * Display the tree - used for debugging purpose !
  *
+ * Parameters :
+ *              Tree *bonzai : pointor to the tree to display
  */
-void show_tree(Tree *bonzai){
-  int count_leaf=0;
-  Node *current;
-
-  current = bonzai->root;
-  count_leaf = current->n_subnode;
-
-  printf("\n");
-  while(current->next[0] != NULL){
-    printf("-----> leaf : %p having %d sub-leaf \n", current, current->n_subnode);
-
-    if( count_leaf == current->n_subnode){
-      count_leaf = 0;
-      current = current->next[count_leaf];
-    }else
-      count_leaf ++;
-
+void show_tree(Node *current_leaf){
+  
+  int i, n_lvl = NCELL*NCELL;
+  char tmp[10]={""};
+    
+  tmp[9] = '\0';
+  for(i=0;i<current_leaf->n_subnode; i++){
+      printf("%s|-> leafs %p with subleafs %p \n", tmp, current_leaf, current_leaf->next[i] );
   }
   
+  if( current_leaf->next != NULL )
+    show_tree(current_leaf->next[0]);
+  else
+    return;
 }

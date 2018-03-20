@@ -158,7 +158,7 @@ int main ( int argc, char** argv ){
 	  board[rel_pos_y][rel_pos_x] = SIGN_O;
 	  
 	  /* test for win */
-	  test_4_winner(board, &winner, &winner_sign);
+	  asm_test_4_winner(board, &winner, &winner_sign);
 	}
       }
 
@@ -190,7 +190,7 @@ int main ( int argc, char** argv ){
 
   /* TEST OF TREE STRUCTURE */
   Tree *bonzai = initialize_tree();
-  //show_tree(bonzai); 
+  show_tree(bonzai->root); 
   
   return 0;
 }
