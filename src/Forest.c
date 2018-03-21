@@ -15,8 +15,8 @@
 Tree * initialize_tree(){
 
   /* local variables */
-  int i, j, k, n_lvl, n_current, tmp, total_node=0;
-  int nleaf_lvl[NCELL*NCELL];
+  int i, j, k, n_lvl, tmp, total_node=0;
+  int nleaf_lvl[TREE_DEPTH];
 
    /* contains all node to dispatche trouhght the tree
    * alco could be used to parcours l'arbre en largeur 
@@ -28,7 +28,8 @@ Tree * initialize_tree(){
   Tree *tree;
   
   /* number of level of the tree */
-  n_lvl = NCELL*NCELL;
+  // WARNING cut the tree for lowest memory consumption
+  n_lvl = TREE_DEPTH;
 
   /* test allocation the tree =) */
   tree = (Tree *) malloc(sizeof(Tree *));
@@ -45,7 +46,7 @@ Tree * initialize_tree(){
    * level 3 -> 336 leafs 6 per mother leaf ...
    */
   nleaf_lvl[0] = 1;
-  tmp = NCELL*NCELL-1;
+  tmp = n_lvl-1;
   total_node = nleaf_lvl[0];
   for(i=1; i<n_lvl; i++){
     nleaf_lvl[i] = nleaf_lvl[i-1]*tmp;
@@ -89,52 +90,211 @@ Tree * initialize_tree(){
   }
   /* --------------------------------------------------------------------- ----- -- */
   
+  /* ------------------------------------- Set 'next' -------------------- ***** -- */
   
-/*  #ifdef DEBUG
-  printf("level %d  with %d leafs -> this %d @ %p\n",0, 1, 0,leafs[0][0]);
-  printf(" ---------------------------------------------------------\n");
-  for(i=1; i<n_lvl; i++){
-    n_2_alloc = leaf_by_lvl[i-1] * leaf_by_lvl[i];
-    for(j=0; j<n_2_alloc; j++ ){
-      printf("level %d  with %d leafs -> this %d @ %p\n",i, n_2_alloc, j, leafs[i][j]);
-    }
-    printf(" ---------------------------------------------------------\n");
-  }
-  #endif*/
+  // set root of the tree
+  tree->root = (Node *) leafs[0][0];
   
-  /* loop over the leafs array to dispach all nodes in next arrays */
-/*  n_current = n_lvl-1;
-  tree->root = leafs[0][0];
+#ifdef DEBUG
+  printf("\n> Start loop over level\n");
+#endif
   
-  #ifdef DEBUG
-    char tmp2[10]={""};
-    tmp2[9] = '\0';
-  #endif
-  
-  current_leaf = leafs[0][0];
-  for(i=1; i<n_lvl-1; i++){
+  /* loop over all level */
+  for(i=0; i<n_lvl-1; i++){
     
-    for(j=0; j<leaf_by_lvl[i-1]; j++){
+#ifdef DEBUG
+  printf("\n> level %d \n",i);
+#endif
+    
+    // loop over all leaf in one level
+    for(j=0; j<nleaf_lvl[i]; j++){
       
-      #ifdef DEBUG
-        printf("%s|-> leaf %d @ at %p with %d subleafs \n", tmp2, i, current_leaf, leaf_by_lvl[i]);
-      #endif
+#ifdef DEBUG
+  //printf("\n\t> leaf number %d \n",j);
+#endif      
       
-      for(k=0; k<leaf_by_lvl[i]; k++){
-        #ifdef DEBUG
-          printf("\t%s --> subleaf @ %p\n", tmp2, leafs[i][j*leaf_by_lvl[i-1]+k]);
-        #endif
-        
-          current_leaf->next[k] = leafs[i][j*leaf_by_lvl[i-1]+k];
+      // allocate his array of next
+      leafs[i][j]->next = (Node **) malloc(nleaf_lvl[i+1]*sizeof(Node *));
+      if( leafs[i] == NULL ){
+        printf("Allocation of next's array of leaf[%d][%d] failed ! \n",i,j);
+        return NULL;
+      }
+
+#ifdef DEBUG
+  printf("\n> Allocation succes of next @ %p \n", leafs[i][j]->next);
+#endif
+    
+      // set his number of leaf
+      leafs[i][j]->n_subnode = nleaf_lvl;
+      
+      // loop over all subleaf to set as next leaf
+      for(k=0; k<nleaf_lvl[i+1]; k++){
+        leafs[i][j]->next[k] = leafs[i+1][j*nleaf_lvl[i+1]+k];
+      }
+            
+    }
+    
+  }
+
+  /* --------------------------------------------------------------------- ----- -- */
+  
+  return tree;
+}
+
+/* Initialize the tree since there is NCELL x NCELL
+ * the first node of the tree will have (NCELL x NCELL)-1
+ * the second ((NCELL*NCELL)-1)-1 etc ... we'll allocate the
+ * memory in consequence and hope for the best !
+ *
+ * headache with this
+ *
+ */
+Tree * initialize_tree_corrected_depth(){
+
+  /* local variables */
+  int i, j, k, n_lvl, tmp, count, current_nleaf, theoric_depth, total_node=0;
+  int nleaf_lvl[TREE_DEPTH];
+
+   /* contains all node to dispatche trouhght the tree
+   * alco could be used to parcours l'arbre en largeur 
+   */
+  Node ***leafs; 
+  Node *current_leaf;
+  
+  /* pointor to the tree */
+  Tree *tree;
+  
+  /* number of level of the tree */
+  // WARNING cut the tree for lowest memory consumption
+  n_lvl = TREE_DEPTH;
+  theoric_depth = (NCELL*NCELL)-1;
+
+  /* test allocation the tree =) */
+  tree = (Tree *) malloc(sizeof(Tree *));
+  if( !tree ){
+    printf("Allocation of tree failed !");
+    return NULL;
+  }else
+    printf("> Allocation of Tree success - mem adresse %p\n", tree);
+
+  /* compute leaf by level ----------------------------------------------- NEED CHECK -- */
+  /* level 0 -> 1 leaf
+   * level 1 -> 8 leafs per 1 mother leaf
+   * level 2 -> 56 leafs 7 per mother leaf
+   * level 3 -> 336 leafs 6 per mother leaf ...
+   */
+  nleaf_lvl[0] = 1;
+  tmp = theoric_depth;
+  total_node = nleaf_lvl[0];
+  for(i=1; i<TREE_DEPTH; i++){
+    nleaf_lvl[i] = nleaf_lvl[i-1]*tmp;
+    total_node += nleaf_lvl[i];
+    tmp --;
+  }
+
+#ifdef DEBUG
+  for(i=0; i<TREE_DEPTH; i++)
+    printf("> \t level %d with %d leafs \n", i, nleaf_lvl[i]);
+  printf("\n");
+#endif
+  
+  
+  /* --------------------------------------------------------------------- ----- -- */
+  
+  /* -------------------------------------- allocate matrix -------------- NEED CHECK -- */
+  
+  /* Allocate all nodes in triangular like matrix  
+   * allocate next array, set n_subnode value
+   */
+  leafs = (Node ***) malloc(total_node*sizeof(Node **));
+  if( !leafs ){
+    printf("Allocation of leafs failed ! \n");
+    return NULL;
+  }else
+    printf("> Allocation of *** leafs success - mem adresse %p\n", leafs);
+    
+  for(i=0; i<TREE_DEPTH; i++){
+    leafs[i] = (Node **) malloc(nleaf_lvl[i]*sizeof(Node *));
+    if( leafs[i] == NULL ){
+      printf("Allocation of **leafs[%d] failed ! \n",i);
+      return NULL;
+    }else
+      printf("> Allocation of **leafs[%d] success - mem adresse %p\n", i, leafs[i]);
+  }
+  
+  /* --------------------------------------------------------------------- ----- -- */
+  
+  /* ------------------------------------ allocate node in matrix -------- NEED CHECK -- */
+  for(i=0; i<TREE_DEPTH; i++){
+   for(j=0; j<nleaf_lvl[i]; j++){
+    leafs[i][j] = (Node *) malloc(sizeof(Node));
+    if( leafs[i][j] == NULL ){
+      printf("Allocation of *leafs[%d][%d] failed ! \n",i,j);
+      return NULL;
+    }
+   }
+  }
+  /* --------------------------------------------------------------------- ----- -- */
+  
+  /* ------------------------------------- Set 'next' -------------------- ***** -- */
+  
+  // set root of the tree
+  tree->root = (Node *) leafs[0][0];
+  
+#ifdef DEBUG
+  printf("\n> Start loop over level\n");
+#endif
+  
+  current_nleaf = 1;
+  
+  /* loop over all level */
+  for(i=0; i<TREE_DEPTH-1; i++){
+    
+#ifdef DEBUG
+  printf("\n> level %d \n",i);
+  tmp = 0;
+  count = 0;
+#endif
+    
+    // loop over all leaf in one level
+    for(j=0; j<nleaf_lvl[i]; j++){
+      
+      // set his number of subleafs
+      leafs[i][j]->n_subnode = (current_nleaf-1);
+      
+      // allocate his array of next
+      leafs[i][j]->next = (Node **) malloc((current_nleaf-1)*sizeof(Node *));
+      if( leafs[i][j]->next == NULL ){
+        printf("Allocation of next's array of leaf[%d][%d] failed ! \n",i,j);
+        return NULL;
       }
       
-      current_leaf = leafs[i][j];
+#ifdef DEBUG
+      /* count number of allocation for this level */
+      tmp ++;
+#endif
+      
+      // loop over all subleaf to set as next leaf
+      for(k=0; k<(current_nleaf-1); k++){
+        leafs[i][j]->next[k] = leafs[i+1][j*(current_nleaf-1)+k];
+        count ++;
+      }
+            
     }
+
+    if( i == 0 )
+      current_nleaf = theoric_depth;
+    else
+      current_nleaf --;
     
-    #ifdef DEBUG
-      tmp2[i]= '\t';
-    #endif
-  } */
+#ifdef DEBUG
+  printf("\t> Allocation succes of %d 'next array' for this level\n", tmp);
+  printf("\t> %d leafs has been set as subleafs of this level\n", count);
+#endif
+    
+  }
+
+  /* --------------------------------------------------------------------- ----- -- */
   
   return tree;
 }
@@ -147,7 +307,7 @@ Tree * initialize_tree(){
  */
 void show_tree(Node *current_leaf){
   
-  int i, n_lvl = NCELL*NCELL;
+  int i, n_lvl = TREE_DEPTH;
   char tmp[10]={""};
     
   tmp[9] = '\0';

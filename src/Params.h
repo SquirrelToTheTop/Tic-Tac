@@ -11,6 +11,10 @@
 // number of cell in one row/column
 #define NCELL 3
 
+// deth of the tree, less than NCELL*NCELL -1
+// because (NCELL*NCELL-1)! is to much
+#define TREE_DEPTH 5
+
 // number of sign aligned for win
 #define WIN_ALIGN 3
 

@@ -16,10 +16,13 @@ struct Tree{
   Node *root;
 };
 
+/* Initialize tree structure and make all memory allocation */
 Tree * initialize_tree();
 
-/* test new algo */
-Tree * initialize_tree_test();
+/* Initialize tree structure with smaller depth than theoric one and 
+ * make all allocation
+ */
+Tree * initialize_tree_corrected_depth();
 
 void show_tree(Node *);
 

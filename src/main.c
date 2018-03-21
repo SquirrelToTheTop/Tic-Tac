@@ -189,7 +189,7 @@ int main ( int argc, char** argv ){
   free(board);
 
   /* TEST OF TREE STRUCTURE */
-  Tree *bonzai = initialize_tree();
+  Tree *bonzai = initialize_tree_corrected_depth();
   if( !bonzai ){
     printf("Error : Allocation of bonzai failed ! Kernel Panic ! \n");
     return 1;
