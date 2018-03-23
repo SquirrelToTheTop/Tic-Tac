@@ -193,8 +193,20 @@ int main ( int argc, char** argv ){
   if( !bonzai ){
     printf("Error : Allocation of bonzai failed ! Kernel Panic ! \n");
     return 1;
+  }else
+    printf("\n> Allocation of reduced tree of possibility success !\n");
+  
+  /* display tree */
+  if( bonzai->root == NULL)
+    printf("Error no root has been defined !\n");
+  else{
+    
+    #ifdef DEBUG
+      printf("> root @ %p\n", bonzai->root);
+    #endif
+      
+    show_tree(bonzai->root); 
   }
-  //show_tree(bonzai->root); 
   
   return 0;
 }

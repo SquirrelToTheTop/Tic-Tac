@@ -13,7 +13,7 @@
 
 // deth of the tree, less than NCELL*NCELL -1
 // because (NCELL*NCELL-1)! is to much
-#define TREE_DEPTH 5
+#define TREE_DEPTH 4
 
 // number of sign aligned for win
 #define WIN_ALIGN 3

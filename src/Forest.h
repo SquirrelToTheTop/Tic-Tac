@@ -7,7 +7,6 @@ struct Node{
   int n_subnode;
   float value;
   Node **next;
-  Node *previous;
 };
  
  /* One tree for the planet */
