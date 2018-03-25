@@ -23,6 +23,9 @@ Tree * initialize_tree();
  */
 Tree * initialize_tree_corrected_depth();
 
+/*
+ * Display the tree brutally
+ */
 void show_tree(Node *);
 
 #endif

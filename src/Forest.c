@@ -174,12 +174,42 @@ Tree * initialize_tree_corrected_depth(){
  */
 void show_tree(Node *current_leaf){
   
-  int i;
+  int i, tmp;
+  char *tabs;
   
   if( current_leaf == NULL)
     return;
   else{
-    printf(" Leaf @ %p with %d subleafs\n", current_leaf, current_leaf->n_subnode);
+    
+    if( current_leaf->n_subnode != 0 ){
+      
+      tmp = ( (NCELL*NCELL-1)%current_leaf->n_subnode) +1;
+      if( tmp == 0 ){
+        
+        printf("> Leaf @ %p with %d subleafs\n", current_leaf, current_leaf->n_subnode);
+      
+      }else{
+        tabs = (char *) malloc(tmp*sizeof(char));
+        for(i=0; i<tmp; i++)
+          tabs[i] = '\t';
+        tabs[tmp-1] = '\0';
+      
+        printf("%s > Leaf @ %p with %d subleafs\n", tabs, current_leaf, current_leaf->n_subnode);
+      }
+      
+    }else{
+      
+      if(current_leaf->n_subnode == 0 ){
+      
+        tabs = (char *) malloc(TREE_DEPTH*sizeof(char));
+        for(i=0; i<TREE_DEPTH; i++)
+          tabs[i] = '\t';
+        tabs[TREE_DEPTH-1] = '\0';
+        printf("%s > Leaf @ %p with %d subleafs\n", tabs, current_leaf, current_leaf->n_subnode);
+      }
+      
+    }
+    
     for( i=0; i<current_leaf->n_subnode; i++ ){
       show_tree(current_leaf->next[i]);
     }
