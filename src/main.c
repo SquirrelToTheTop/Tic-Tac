@@ -14,7 +14,7 @@ int main ( int argc, char** argv ){
   /* Define game*/
   int **board;
   
-  /* allocate memory */
+  /* allocate memory for board game */
   board = (int **)malloc(sizeof(int *)*NCELL);
   for(i=0; i<NCELL; i++){
     board[i] = (int *) malloc(sizeof(int)*NCELL);
@@ -27,7 +27,7 @@ int main ( int argc, char** argv ){
     }
   }
 
-  /* SDL PART */
+  /* ------------------------------------------------- SDL PART --------------- */
   SDL_Surface* screen;
   SDL_Surface* white_cell;
   SDL_Surface* bmpX_cell;
@@ -188,6 +188,8 @@ int main ( int argc, char** argv ){
   }
   free(board);
 
+  /* -------------------------------------------------------------------------- */
+  
   /* TEST OF TREE STRUCTURE */
   Tree *bonzai = initialize_tree_corrected_depth();
   if( !bonzai ){
@@ -202,9 +204,13 @@ int main ( int argc, char** argv ){
   else{
     
     #ifdef DEBUG
-      printf("> root @ %p\n", bonzai->root);
+      printf("\n> root @ %p\n\n", bonzai->root);
     #endif
-      
+    
+    printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
+    
+    printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
+    
     show_tree(bonzai->root); 
   }
   
