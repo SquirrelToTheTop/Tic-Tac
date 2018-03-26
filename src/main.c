@@ -9,12 +9,12 @@
 
 int main ( int argc, char** argv ){
 
-  int i, j;
+  int i, j, n_sign_on_board=0;
 
   /* Define game*/
   int **board;
   
-  /* allocate memory for board game */
+  /* Board game and tree of possibility --------------------------------------- */
   board = (int **)malloc(sizeof(int *)*NCELL);
   for(i=0; i<NCELL; i++){
     board[i] = (int *) malloc(sizeof(int)*NCELL);
@@ -26,6 +26,31 @@ int main ( int argc, char** argv ){
       board[i][j] = NO_SIGN;
     }
   }
+  
+  /* Tree structure */
+  Tree *bonzai = initialize_tree_corrected_depth();
+  if( !bonzai ){
+    printf("Error : Allocation of bonzai failed ! Kernel Panic ! \n");
+    return 1;
+  }else
+    printf("\n> Allocation of reduced tree of possibility success !\n");
+  
+  /* display tree */
+  if( bonzai->root == NULL){
+    printf("Error no root has been defined !\n");
+    return 1;
+  }
+    
+  // if debug mode, show tree
+  #ifdef DEBUG
+    printf("\n> root @ %p\n\n", bonzai->root);
+    printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
+    
+    printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
+    
+    show_tree(bonzai->root); 
+  #endif
+  
 
   /* ------------------------------------------------- SDL PART --------------- */
   SDL_Surface* screen;
@@ -130,6 +155,7 @@ int main ( int argc, char** argv ){
 	rel_pos_x = (int)(tmp_x / (WIDHT_CELL+OFF_SET));
 	rel_pos_y = (int)(tmp_y / (HEIGHT_CELL+OFF_SET));
 	
+        /* ADD SIGN TO THE GRID */
 	if( board[rel_pos_y][rel_pos_x] == NO_SIGN ){
 	  x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
 	  x_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
@@ -138,6 +164,29 @@ int main ( int argc, char** argv ){
 	  /* add value to board */
 	  board[rel_pos_y][rel_pos_x] = SIGN_X;
 	  
+          /* add 1 to n_sign_on_board
+           * WARNING must be before the call to add_to_tree because used as level 
+           */
+          n_sign_on_board ++;
+
+          /* add value to tree */
+          if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'X') ){
+            printf("> Sign added to tree (%d, ", n_sign_on_board);
+            printf("%c, %d, %d): succes !\n", 'X', rel_pos_x, rel_pos_y);
+          }else{
+            printf("\x1b[31m> New sign cannot be added to tree ! \x1b[0m \n");
+          }
+
+          // if debug mode, show tree
+          #ifdef DEBUG
+            printf("\n> root @ %p\n\n", bonzai->root);
+            printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
+    
+            printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
+    
+            show_tree(bonzai->root); 
+          #endif
+          
 	  /* test for win */
 	  test_4_winner(board, &winner, &winner_sign);
 	}
@@ -157,6 +206,29 @@ int main ( int argc, char** argv ){
 	  /* add value to board */
 	  board[rel_pos_y][rel_pos_x] = SIGN_O;
 	  
+          /* add 1 to n_sign_on_board
+           * WARNING must be before the call to add_to_tree because used as level 
+           */
+          n_sign_on_board ++;
+          
+          /* add value to tree */
+          if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'O') ){
+            printf("> Sign added to tree (%d, ", n_sign_on_board);
+            printf("%c, %d, %d): succes !\n", 'O', rel_pos_x, rel_pos_y);
+          }else{
+            printf("\x1b[31m> New sign cannot be added to tree ! \x1b[0m \n");
+          }
+          
+          // if debug mode, show tree
+          #ifdef DEBUG
+            printf("\n> root @ %p\n\n", bonzai->root);
+            printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
+    
+            printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
+    
+            show_tree(bonzai->root); 
+          #endif
+
 	  /* test for win */
 	  asm_test_4_winner(board, &winner, &winner_sign);
 	}
@@ -189,30 +261,6 @@ int main ( int argc, char** argv ){
   free(board);
 
   /* -------------------------------------------------------------------------- */
-  
-  /* TEST OF TREE STRUCTURE */
-  Tree *bonzai = initialize_tree_corrected_depth();
-  if( !bonzai ){
-    printf("Error : Allocation of bonzai failed ! Kernel Panic ! \n");
-    return 1;
-  }else
-    printf("\n> Allocation of reduced tree of possibility success !\n");
-  
-  /* display tree */
-  if( bonzai->root == NULL)
-    printf("Error no root has been defined !\n");
-  else{
-    
-    #ifdef DEBUG
-      printf("\n> root @ %p\n\n", bonzai->root);
-    #endif
-    
-    printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
-    
-    printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
-    
-    show_tree(bonzai->root); 
-  }
   
   return 0;
 }

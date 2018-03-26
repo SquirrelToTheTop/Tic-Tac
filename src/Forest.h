@@ -24,10 +24,12 @@ Tree * initialize_tree();
  */
 Tree * initialize_tree_corrected_depth();
 
-/* Initialize tree structure with smaller depth than theoric BUT from
- * current state of game
+/*
+ * Add information about one node to the tree
+ * ie : after the player or computer plays, we need to update the tree
+ * 
  */
-Tree * initialize_tree_customized();
+int add_to_tree(Tree *, int, int, int, char);
 
 /*
  * Display the tree brutally
