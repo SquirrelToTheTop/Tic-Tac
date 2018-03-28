@@ -14,6 +14,10 @@ int main ( int argc, char** argv ){
   /* Define game*/
   int **board;
   
+  // who's next player - first played will be 'x' 
+  int x_played=FALSE, o_player=TRUE, computer_played=TRUE;
+  
+  
   /* Board game and tree of possibility --------------------------------------- */
   board = (int **)malloc(sizeof(int *)*NCELL);
   for(i=0; i<NCELL; i++){
@@ -113,6 +117,7 @@ int main ( int argc, char** argv ){
   int winner_sign;
   
   while (!done){
+    
     // message processing loop
     SDL_Event event;
     while (SDL_PollEvent(&event)){
@@ -124,7 +129,6 @@ int main ( int argc, char** argv ){
 	  break;
 	
        // check for keypresses
-	
         case SDL_KEYDOWN:
 	  {
 	    switch(event.key.keysym.sym){
@@ -148,20 +152,21 @@ int main ( int argc, char** argv ){
       int tmp_x, tmp_y;
       int rel_pos_x, rel_pos_y;
       
-      if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+      // the player with the sign 'x' clicked
+      if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT) && !x_played) {
 	SDL_GetMouseState(&tmp_x, &tmp_y);
 	
-	/* WARNING : rel_pos_x -> index for column, rel_pos_y -> index for line */
+	// WARNING : rel_pos_x -> index for column, rel_pos_y -> index for line
 	rel_pos_x = (int)(tmp_x / (WIDHT_CELL+OFF_SET));
 	rel_pos_y = (int)(tmp_y / (HEIGHT_CELL+OFF_SET));
 	
-        /* ADD SIGN TO THE GRID */
+        // ADD SIGN TO THE GRID
 	if( board[rel_pos_y][rel_pos_x] == NO_SIGN ){
 	  x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
 	  x_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
 	  SDL_BlitSurface(bmpX_cell, NULL, screen, &x_cell_pos);
 	  
-	  /* add value to board */
+	  // add value to board
 	  board[rel_pos_y][rel_pos_x] = SIGN_X;
 	  
           /* add 1 to n_sign_on_board
@@ -169,7 +174,7 @@ int main ( int argc, char** argv ){
            */
           n_sign_on_board ++;
 
-          /* add value to tree */
+          // add value to tree
           if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'X') ){
             printf("> Sign added to tree (%d, ", n_sign_on_board);
             printf("%c, %d, %d): succes !\n", 'X', rel_pos_x, rel_pos_y);
@@ -187,12 +192,38 @@ int main ( int argc, char** argv ){
             show_tree(bonzai->root); 
           #endif
           
-	  /* test for win */
+	  // test for win
 	  test_4_winner(board, &winner, &winner_sign);
+          
+          // set boolean for next player
+          x_played = TRUE;
+          computer_played = FALSE;
+          
 	}
       }
+      
+      /* ----------- COMPUTER IA PART ----------------------------------------- */
+      if( x_played && !computer_played ){
+        if( computer_move(board, bonzai->root, &rel_pos_x, &rel_pos_y) ){
+          
+          computer_played = TRUE;
+          x_played = FALSE;
+          
+          x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
+	  x_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
+	  SDL_BlitSurface(bmpO_cell, NULL, screen, &x_cell_pos);
+          
+          printf("> Move success @ %d, %d \n", rel_pos_y, rel_pos_x);
+        }else
+         printf("> Error : computer can't plays\n");
+        
+        // test for win
+        test_4_winner(board, &winner, &winner_sign);
+      }
+      /* ------------------------------------------------------------------ */
 
-      if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+      // the second player with the sign 'o' clicked
+      if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT) && !SOLO) {
 	SDL_GetMouseState(&tmp_x, &tmp_y);
 	
 	rel_pos_x = (int)(tmp_x / (WIDHT_CELL+OFF_SET));
@@ -203,15 +234,15 @@ int main ( int argc, char** argv ){
 	  o_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
 	  SDL_BlitSurface(bmpO_cell, NULL, screen, &o_cell_pos);
 	  
-	  /* add value to board */
+	  // add value to board
 	  board[rel_pos_y][rel_pos_x] = SIGN_O;
 	  
-          /* add 1 to n_sign_on_board
-           * WARNING must be before the call to add_to_tree because used as level 
-           */
+          // add 1 to n_sign_on_board
+          // WARNING must be before the call to add_to_tree because used as level 
+          //
           n_sign_on_board ++;
           
-          /* add value to tree */
+          // add value to tree
           if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'O') ){
             printf("> Sign added to tree (%d, ", n_sign_on_board);
             printf("%c, %d, %d): succes !\n", 'O', rel_pos_x, rel_pos_y);
@@ -229,13 +260,13 @@ int main ( int argc, char** argv ){
             show_tree(bonzai->root); 
           #endif
 
-	  /* test for win */
+	  // test for win
 	  asm_test_4_winner(board, &winner, &winner_sign);
 	}
       }
 
       if( winner ){
-	printf("The winner is %d ! My job is done here ! Syonara pucci !\n", winner_sign);
+	printf("\nThe winner is %d ! My job is done here ! Syonara pucci !\n", winner_sign);
 	done = TRUE;
       }
 
@@ -246,7 +277,7 @@ int main ( int argc, char** argv ){
   } // end main loop
 
   // all is well ;
-  printf("Exited SDL cleanly\n\n");
+  printf("\n--> Exited SDL cleanly\n\n");
 
   /* SDL free allocated memory */
   SDL_FreeSurface(white_cell);

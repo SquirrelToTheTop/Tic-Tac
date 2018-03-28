@@ -28,4 +28,7 @@
 #define TRUE 1
 #define FALSE 0
 
+// set solo mode by default
+#define SOLO TRUE
+
 #endif

@@ -233,7 +233,7 @@ int add_to_tree(Tree *bonzai, int level, int row, int col, char sign){
   }
   
   if( leaf_checked > current_leaf->n_subnode ){
-    printf("\x1b[31mError : all leaf of current level full ! \x1b[0m \n");
+    printf("\x1b[31mError : all leaf of current level are full ! \x1b[0m \n");
     return 0;
   }
   

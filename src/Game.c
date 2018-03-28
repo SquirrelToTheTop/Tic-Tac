@@ -1,5 +1,39 @@
+// juste for the moment -------------------------------------------------------
+#include <time.h>
+// ----------------------------------------------------------------------------
+
 #include "Params.h"
 #include "Game.h"
+#include "Forest.h"
+
+/* WARNING THIS FUNCTION CHANGE ONE VALUE ON BOARD */
+int computer_move(int **board, Tree *bonzai, int *pos_x, int *pos_y){
+  
+  printf("\n> Work in progress bro', for the time being I don't know what to play..\n");
+  
+  srand(time(NULL));
+  
+  int row, col, int_max = NCELL;
+  int ok = FALSE;
+  
+  row=0;
+  col=0;
+  while( !ok ){
+    row = rand() % int_max;
+    col = rand() % int_max;
+    
+    printf("test for %d,%d\n",row,col);
+    if( board[row][col] == 0 ){
+      ok = TRUE;
+      *pos_x = col;
+      *pos_y = row;
+      board[row][col];
+    }
+    
+  }
+  
+  return TRUE;
+}
 
 /* Test for a winner, ie : N aligned sign diagonaly, verticaly or horizontaly
 *
