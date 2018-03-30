@@ -1,3 +1,5 @@
+#include <stdlib.h> // for free mem function
+
 // juste for the moment -------------------------------------------------------
 #include <time.h>
 // ----------------------------------------------------------------------------
@@ -5,6 +7,38 @@
 #include "Params.h"
 #include "Game.h"
 #include "Forest.h"
+
+/* initialize board game and set default value */
+int ** initialize_board_mem(){
+  int i, j;
+  int **board;
+  
+  board = (int **)malloc(sizeof(int *)*NCELL);
+  for(i=0; i<NCELL; i++){
+    board[i] = (int *) malloc(sizeof(int)*NCELL);
+  }
+
+  // initialize content of board with NO_SIGN def
+  for(i=0; i<NCELL; i++){
+    for(j=0; j<NCELL; j++){
+      board[i][j] = NO_SIGN;
+    }
+  }
+  
+  return board;
+}
+
+/* Free board memory */
+void free_board_mem(int ** board){
+  int i;
+  
+  for(i=0; i<NCELL; i++){
+    free(board[i]);
+  }
+  free(board);
+  
+}
+
 
 /* WARNING THIS FUNCTION CHANGE ONE VALUE ON BOARD */
 int computer_move(int **board, Tree *bonzai, int *pos_x, int *pos_y){
@@ -23,11 +57,11 @@ int computer_move(int **board, Tree *bonzai, int *pos_x, int *pos_y){
     col = rand() % int_max;
     
     printf("test for %d,%d\n",row,col);
-    if( board[row][col] == 0 ){
+    if( board[row][col] != SIGN_X && board[row][col] != SIGN_O ){
       ok = TRUE;
       *pos_x = col;
       *pos_y = row;
-      board[row][col];
+      //board[row][col];
     }
     
   }

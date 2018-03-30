@@ -9,27 +9,18 @@
 
 int main ( int argc, char** argv ){
 
+  // usual local 
   int i, j, n_sign_on_board=0;
 
-  /* Define game*/
+  // Define game
   int **board;
   
   // who's next player - first played will be 'x' 
   int x_played=FALSE, o_player=TRUE, computer_played=TRUE;
   
   
-  /* Board game and tree of possibility --------------------------------------- */
-  board = (int **)malloc(sizeof(int *)*NCELL);
-  for(i=0; i<NCELL; i++){
-    board[i] = (int *) malloc(sizeof(int)*NCELL);
-  }
-
-    /* initialize content of board with NO_SIGN def */
-  for(i=0; i<NCELL; i++){
-    for(j=0; j<NCELL; j++){
-      board[i][j] = NO_SIGN;
-    }
-  }
+  // Board game and tree of possibility ---------------------------------------
+  board = initialize_board_mem();
   
   /* Tree structure */
   Tree *bonzai = initialize_tree_corrected_depth();
@@ -203,11 +194,13 @@ int main ( int argc, char** argv ){
       }
       
       /* ----------- COMPUTER IA PART ----------------------------------------- */
-      if( x_played && !computer_played ){
+      if( x_played && !computer_played && n_sign_on_board != NCELL*NCELL){
         if( computer_move(board, bonzai->root, &rel_pos_x, &rel_pos_y) ){
           
           computer_played = TRUE;
           x_played = FALSE;
+          
+          board[rel_pos_y][rel_pos_x] = SIGN_O;
           
           x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
 	  x_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
@@ -219,6 +212,8 @@ int main ( int argc, char** argv ){
         
         // test for win
         test_4_winner(board, &winner, &winner_sign);
+        
+        n_sign_on_board ++ ;
       }
       /* ------------------------------------------------------------------ */
 
@@ -286,12 +281,7 @@ int main ( int argc, char** argv ){
   SDL_FreeSurface(screen);
   
   /* free allocated memory */
-  for(i=0; i<NCELL; i++){
-    free(board[i]);
-  }
-  free(board);
-
-  /* -------------------------------------------------------------------------- */
-  
+  free_board_mem(board);
+   
   return 0;
 }

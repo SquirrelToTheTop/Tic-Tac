@@ -3,6 +3,12 @@
 
 #include "Forest.h"
 
+/* allocate memory for board game */
+int ** initialize_board_mem();
+
+/* free memory for board game */
+void free_board_mem(int **);
+
 /* test for a winner in the board game */
 void test_4_winner(int **, int *, int *);
 
