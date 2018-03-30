@@ -24,6 +24,9 @@ Tree * initialize_tree();
  */
 Tree * initialize_tree_corrected_depth();
 
+/* Initialize tree from current state of board */
+Tree * initialize_tree_customize(int);
+
 /*
  * Add information about one node to the tree
  * ie : after the player or computer plays, we need to update the tree

@@ -16,21 +16,28 @@ int main ( int argc, char** argv ){
   int **board;
   
   // who's next player - first played will be 'x' 
-  int x_played=FALSE, o_player=TRUE, computer_played=TRUE;
+  int x_played=FALSE, computer_played=TRUE;
   
   
   // Board game and tree of possibility ---------------------------------------
   board = initialize_board_mem();
+  if( board == NULL ){
+    printf("%s> Error : Allocation of board failed ! Kernel Panic ! \n", RED);
+    return 1;
+  }else{
+    printf("\n%s> Allocation of board success !\x1b[0m\n",GREEN);
+  }
   
-  /* Tree structure */
+  
+  // Tree structure 
   Tree *bonzai = initialize_tree_corrected_depth();
-  if( !bonzai ){
-    printf("Error : Allocation of bonzai failed ! Kernel Panic ! \n");
+  if( bonzai == NULL ){
+    printf("%s> Error : Allocation of bonzai failed ! Kernel Panic ! \n",RED);
     return 1;
   }else
-    printf("\n> Allocation of reduced tree of possibility success !\n");
+    printf("\n%s> Allocation of tree of possibility success !\x1b[0m\n",GREEN);
   
-  /* display tree */
+  // check if root has been set 
   if( bonzai->root == NULL){
     printf("Error no root has been defined !\n");
     return 1;
@@ -39,7 +46,7 @@ int main ( int argc, char** argv ){
   // if debug mode, show tree
   #ifdef DEBUG
     printf("\n> root @ %p\n\n", bonzai->root);
-    printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
+    printf("%s--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n",GREEN);
     
     printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
     
@@ -53,7 +60,7 @@ int main ( int argc, char** argv ){
   SDL_Surface* bmpX_cell;
   SDL_Surface* bmpO_cell;
   
-  SDL_Rect white_pos, x_cell_pos, o_cell_pos;
+  SDL_Rect white_pos, sign_pos;
   
   int video_mode_x = WIDHT_CELL * NCELL + (NCELL+1) * OFF_SET;
   int video_mode_y = HEIGHT_CELL * NCELL + (NCELL+1) * OFF_SET;
@@ -153,9 +160,9 @@ int main ( int argc, char** argv ){
 	
         // ADD SIGN TO THE GRID
 	if( board[rel_pos_y][rel_pos_x] == NO_SIGN ){
-	  x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
-	  x_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
-	  SDL_BlitSurface(bmpX_cell, NULL, screen, &x_cell_pos);
+	  sign_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
+	  sign_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
+	  SDL_BlitSurface(bmpX_cell, NULL, screen, &sign_pos);
 	  
 	  // add value to board
 	  board[rel_pos_y][rel_pos_x] = SIGN_X;
@@ -166,12 +173,12 @@ int main ( int argc, char** argv ){
           n_sign_on_board ++;
 
           // add value to tree
-          if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'X') ){
+          /*if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'X') ){
             printf("> Sign added to tree (%d, ", n_sign_on_board);
             printf("%c, %d, %d): succes !\n", 'X', rel_pos_x, rel_pos_y);
           }else{
-            printf("\x1b[31m> New sign cannot be added to tree ! \x1b[0m \n");
-          }
+            printf("%s> New sign cannot be added to tree ! \x1b[0m \n", RED);
+          }*/
 
           // if debug mode, show tree
           #ifdef DEBUG
@@ -195,70 +202,37 @@ int main ( int argc, char** argv ){
       
       /* ----------- COMPUTER IA PART ----------------------------------------- */
       if( x_played && !computer_played && n_sign_on_board != NCELL*NCELL){
-        if( computer_move(board, bonzai->root, &rel_pos_x, &rel_pos_y) ){
-          
-          computer_played = TRUE;
-          x_played = FALSE;
+        if( computer_move_random(board, &rel_pos_x, &rel_pos_y) ){
           
           board[rel_pos_y][rel_pos_x] = SIGN_O;
           
-          x_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
-	  x_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
-	  SDL_BlitSurface(bmpO_cell, NULL, screen, &x_cell_pos);
+          sign_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
+	  sign_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
+	  SDL_BlitSurface(bmpO_cell, NULL, screen, &sign_pos);
           
           printf("> Move success @ %d, %d \n", rel_pos_y, rel_pos_x);
         }else
          printf("> Error : computer can't plays\n");
         
         // test for win
-        test_4_winner(board, &winner, &winner_sign);
+        asm_test_4_winner(board, &winner, &winner_sign);
         
+        /* add 1 to n_sign_on_board
+        * WARNING must be before the call to add_to_tree because used as level 
+        */
         n_sign_on_board ++ ;
+        
+        /*if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'X') ){
+          printf("> Sign added to tree (%d, ", n_sign_on_board);
+          printf("%c, %d, %d): succes !\n", 'X', rel_pos_x, rel_pos_y);
+        }else{
+          printf("%s> New sign cannot be added to tree ! \x1b[0m \n", RED);
+        }*/
+        
+        computer_played = TRUE;
+        x_played = FALSE;
       }
       /* ------------------------------------------------------------------ */
-
-      // the second player with the sign 'o' clicked
-      if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT) && !SOLO) {
-	SDL_GetMouseState(&tmp_x, &tmp_y);
-	
-	rel_pos_x = (int)(tmp_x / (WIDHT_CELL+OFF_SET));
-	rel_pos_y = (int)(tmp_y / (HEIGHT_CELL+OFF_SET));
-	
-	if( board[rel_pos_y][rel_pos_x] == NO_SIGN ){
-	  o_cell_pos.x = (rel_pos_x+1)*OFF_SET + rel_pos_x*WIDHT_CELL;
-	  o_cell_pos.y = (rel_pos_y+1)*OFF_SET + rel_pos_y*HEIGHT_CELL;
-	  SDL_BlitSurface(bmpO_cell, NULL, screen, &o_cell_pos);
-	  
-	  // add value to board
-	  board[rel_pos_y][rel_pos_x] = SIGN_O;
-	  
-          // add 1 to n_sign_on_board
-          // WARNING must be before the call to add_to_tree because used as level 
-          //
-          n_sign_on_board ++;
-          
-          // add value to tree
-          if( add_to_tree(bonzai, n_sign_on_board, rel_pos_x, rel_pos_y, 'O') ){
-            printf("> Sign added to tree (%d, ", n_sign_on_board);
-            printf("%c, %d, %d): succes !\n", 'O', rel_pos_x, rel_pos_y);
-          }else{
-            printf("\x1b[31m> New sign cannot be added to tree ! \x1b[0m \n");
-          }
-          
-          // if debug mode, show tree
-          #ifdef DEBUG
-            printf("\n> root @ %p\n\n", bonzai->root);
-            printf("\x1b[31m--------------------- TREE STRUCTURE AND DATAS ---------------------\x1b[0m \n");
-    
-            printf("\n LEAFS (mem add, value, sign, id_row, id_col, subleafs)\n\n");
-    
-            show_tree(bonzai->root); 
-          #endif
-
-	  // test for win
-	  asm_test_4_winner(board, &winner, &winner_sign);
-	}
-      }
 
       if( winner ){
 	printf("\nThe winner is %d ! My job is done here ! Syonara pucci !\n", winner_sign);

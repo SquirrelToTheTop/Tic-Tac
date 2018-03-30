@@ -1,5 +1,7 @@
 #include <stdlib.h> // for free mem function
 
+#include <stdio.h> // for printf for debbug
+
 // juste for the moment -------------------------------------------------------
 #include <time.h>
 // ----------------------------------------------------------------------------
@@ -39,9 +41,35 @@ void free_board_mem(int ** board){
   
 }
 
-
-/* WARNING THIS FUNCTION CHANGE ONE VALUE ON BOARD */
+/* Computer plays base on min max algorithm and tree of possibility
+*
+*  Parameters :
+*               board : input board to check
+*               Tree  : tree structure
+*               pos_x : position on cell as array index (row) 
+*               pos_y : position on cell as array index (column)
+*
+*  Return TRUE or FALSE depending on result of try to play
+*/
 int computer_move(int **board, Tree *bonzai, int *pos_x, int *pos_y){
+  return FALSE;
+}
+
+void tree_of_possibility(Node *current_node, int sign){
+  
+}
+
+
+/* Computer plays on random cell
+*
+*  Parameters :
+*               board : input board to check
+*               pos_x : position on cell as array index (row) 
+*               pos_y : position on cell as array index (column)
+*
+*  Return TRUE or FALSE depending on result of try to play
+*/
+int computer_move_random(int **board, int *pos_x, int *pos_y){
   
   printf("\n> Work in progress bro', for the time being I don't know what to play..\n");
   
@@ -101,14 +129,14 @@ void test_4_winner(int **board, int *any_winner, int *win_sign){
 
   /* test value for diagonal */
   *any_winner = (rst_diag1 == WIN_O || rst_diag2 == WIN_O || rst_diag1 == 1 || rst_diag2 == 1 ) ? TRUE : FALSE;
-  *win_sign = ( (rst_diag1>1) || (rst_diag2 > 1) && (*any_winner) ) ? SIGN_O : SIGN_X;
+  *win_sign = ( (rst_diag1 > 1 || rst_diag2 > 1) && *any_winner ) ? SIGN_O : SIGN_X;
   if( *any_winner)
     return;
   
   /* test all value */
   for(i=0; i<NCELL; i++){
     *any_winner = (rst_line[i] == WIN_O || rst_line[i] == 1 || rst_column[i] == WIN_O || rst_column[i] == 1 ) ? TRUE : FALSE;
-    *win_sign = (rst_line[i] > 1 || rst_column[i] > 1 && *any_winner) ? SIGN_O : SIGN_X;
+    *win_sign = ( (rst_line[i] > 1 || rst_column[i] > 1) && *any_winner ) ? SIGN_O : SIGN_X;
     if( *any_winner )
       return;
   }
@@ -153,14 +181,14 @@ void asm_test_4_winner(int **board, int *any_winner, int *win_sign){
 
   /* test value for diagonal */
   *any_winner = (rst_diag1 == WIN_O || rst_diag2 == WIN_O || rst_diag1 == 1 || rst_diag2 == 1 ) ? TRUE : FALSE;
-  *win_sign = ( (rst_diag1>1) || (rst_diag2 > 1) && (*any_winner) ) ? SIGN_O : SIGN_X;
+  *win_sign = ( (rst_diag1>1 || rst_diag2 > 1) && *any_winner ) ? SIGN_O : SIGN_X;
   if( *any_winner)
     return;
   
   /* test all value */
   for(i=0; i<NCELL; i++){
     *any_winner = (rst_line[i] == WIN_O || rst_line[i] == 1 || rst_column[i] == WIN_O || rst_column[i] == 1 ) ? TRUE : FALSE;
-    *win_sign = (rst_line[i] > 1 || rst_column[i] > 1 && *any_winner) ? SIGN_O : SIGN_X;
+    *win_sign = ( (rst_line[i] > 1 || rst_column[i] > 1) && *any_winner) ? SIGN_O : SIGN_X;
     if( *any_winner )
       return;
   }

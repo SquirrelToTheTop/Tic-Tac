@@ -31,4 +31,7 @@
 // set solo mode by default
 #define SOLO TRUE
 
+#define RED "\x1b[31m"
+#define GREEN "\x1b[32m"
+
 #endif
